@@ -132,14 +132,15 @@ def scanDirs(path):
 			if os.path.isdir(fullpath):
 				scanDirs(fullpath)
 
-	# if folder empty, delete it
+	# check if only file, and move it up one dir
 	files = os.listdir(path)
 	if len(files) == 1:
 		newpath = path.split("/")
 		newpath = filter(None, newpath);
 		newpath.pop()
-		newpath = '/'+'/'.join(newpath)+'/'+files[0]
-		os.rename(path+'/'+files[0], newpath)
+		newpath = '/' + '/'.join(newpath) + '/'+files[0]
+		print "MOVE: " + newpath
+		os.rename(path+'/' + files[0], newpath)
 
 # cleanEmptyDirs
 # Deleted any directories that are empty after cleaning is complete
