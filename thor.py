@@ -3,7 +3,7 @@
 # Process files in a given rootFolder to meet specific naming criteria
 #
 # @created 5/4/2013
-# @modified 5/18/2013
+# @modified 8/5/2013
 # @author Nick Barone
 
 import os, re, string
@@ -56,9 +56,7 @@ def cleanDirs():
 		# strip extra spaces
 		vDir = re.sub(re.compile(' +'), " ", vDir).strip()
 
-		if vDirOld == vDir:
-			print "GOOD: " + vDirOld + " === " + vDir
-		else:
+		if vDirOld != vDir:
 			print "RENAME: " + vDirOld + " >>> " + vDir
 			os.rename(rootFolder+vDirOld, rootFolder+vDir)
 
@@ -94,35 +92,57 @@ def cleanFiles():
 			os.remove(vDirOld)
 			continue
 
- 		# replace common inaccuracies
- 		vFileName = vFileName.replace(".", " ")
+		# replace common inaccuracies
+		vFileName = vFileName.replace(".", " ")
 		vFileName = vFileName.replace("_", " ")
- 		rpMap = [ "'" , "\"" , "/" , "\\" ]
- 		for rpMapItem in rpMap:
- 			vFileName = vFileName.replace(rpMapItem, "")
- 		#remove anything contained in brackets [ ]
- 		vFileName = re.sub(re.compile('\[.+?\]', re.DOTALL), "", vFileName)
- 		#remove and year stamps and everything after them
- 		vFileName = re.sub(re.compile('\(*\d{4}\)*.+', re.DOTALL), "", vFileName)
- 		#remove common includes
- 		rpMap = [ "hdtv.+", "x264.+", "1080i.+", "1080p.+", "720p.+", "dvdrip.+" ]
- 		for rpMapItem in rpMap:
- 			vFileName = re.sub(re.compile(rpMapItem, re.IGNORECASE | re.DOTALL), "", vFileName)
- 		# replace crowded dash
- 		vFileName = vFileName.replace("-", " - ")
- 		# strip extra spaces
- 		vFileName = re.sub(re.compile(' +'), " ", vFileName).strip()
- 		vFileName = vFileName + "." + vFileExt
-  		if vFileNameOld == vFileName:
-  			print "GOOD: " + vFileNameOld + " === " + vFileName
-  		else:
-  			print "RENAME: " + vFileNameOld + " >>> " + vFileName
- 			os.rename(vDirOld, vFileDir + vFileName)
+		rpMap = [ "'" , "\"" , "/" , "\\" ]
+		for rpMapItem in rpMap:
+			vFileName = vFileName.replace(rpMapItem, "")
+		#remove anything contained in brackets [ ]
+		vFileName = re.sub(re.compile('\[.+?\]', re.DOTALL), "", vFileName)
+		#remove and year stamps and everything after them
+		vFileName = re.sub(re.compile('\(*\d{4}\)*.+', re.DOTALL), "", vFileName)
+		#remove common includes
+		rpMap = [ "hdtv.+", "x264.+", "1080i.+", "1080p.+", "720p.+", "dvdrip.+" ]
+		for rpMapItem in rpMap:
+			vFileName = re.sub(re.compile(rpMapItem, re.IGNORECASE | re.DOTALL), "", vFileName)
+		# replace crowded dash
+		if vFileName[0] == '-':
+			vFileName = vFileName[1:]
+		vFileName = vFileName.replace("-", " - ")
+#		if vFileName[0] == '-'
+		# strip extra spaces
+		vFileName = re.sub(re.compile(' +'), " ", vFileName).strip()
+		vFileName = vFileName + "." + vFileExt
+		if vFileNameOld != vFileName:
+			print "RENAME: " + vFileNameOld + " >>> " + vFileName
+			os.rename(vDirOld, vFileDir + vFileName)
+
+# scanDirs
+# Scans dirs for one containing file, and moves it up one level
+def scanDirs(path):
+	if not os.path.isdir(path):
+		return
+
+	# run on subfolders
+	files = os.listdir(path)
+	if len(files):
+		for f in files:
+			fullpath = os.path.join(path, f)
+			if os.path.isdir(fullpath):
+				scanDirs(fullpath)
+
+	# if folder empty, delete it
+	files = os.listdir(path)
+	if len(files) == 1:
+		newpath = path.split("/")
+		newpath = filter(None, newpath);
+		newpath.pop()
+		newpath = '/'+'/'.join(newpath)+'/'+files[0]
+		os.rename(path+'/'+files[0], newpath)
 
 # cleanEmptyDirs
 # Deleted any directories that are empty after cleaning is complete
-#
-# @param string path
 def cleanEmptyDirs(path):
 	if not os.path.isdir(path):
 		return
@@ -146,8 +166,8 @@ def cleanEmptyDirs(path):
 def run():
 	cleanDirs()
 	cleanFiles()
+	scanDirs(rootFolder)
 	cleanEmptyDirs(rootFolder)
-
 
 # run
 run()
