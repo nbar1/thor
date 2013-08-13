@@ -55,7 +55,6 @@ def cleanDirs():
 		vDir = vDir.replace("-", " - ")
 		# strip extra spaces
 		vDir = re.sub(re.compile(' +'), " ", vDir).strip()
-
 		if vDirOld != vDir:
 			print "RENAME: " + vDirOld + " >>> " + vDir
 			os.rename(rootFolder+vDirOld, rootFolder+vDir)
@@ -74,7 +73,6 @@ def cleanFiles():
 	# clean up dir names
 	for vDir in dirContents:
 		vDirOld = vDir
-
 		splitFile = vDir.split("/", -1)
 		vFileName = splitFile.pop().split(".")
 		vFileDir = "/".join(splitFile) + "/"
@@ -110,7 +108,6 @@ def cleanFiles():
 		if vFileName[0] == '-':
 			vFileName = vFileName[1:]
 		vFileName = vFileName.replace("-", " - ")
-#		if vFileName[0] == '-'
 		# strip extra spaces
 		vFileName = re.sub(re.compile(' +'), " ", vFileName).strip()
 		vFileName = vFileName + "." + vFileExt
@@ -159,7 +156,7 @@ def cleanEmptyDirs(path):
 	# if folder empty, delete it
 	files = os.listdir(path)
 	if len(files) == 0:
-		print "REMOVING:" + path
+		print "REMOVING: " + path
 		os.rmdir(path)
 
 # run
